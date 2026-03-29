@@ -31,6 +31,10 @@ function sanitizeText(text: string, maxLen: number): string {
 }
 
 const VALID_TONES = ["Neutral", "Persuasive", "Formal", "Casual"];
+const VALID_LANGUAGES: Record<string, string> = {
+  en: "English", es: "Spanish", fr: "French",
+  de: "German", pt: "Portuguese", it: "Italian",
+};
 const MAX_PROMPT_LENGTH = 1000;
 const MAX_CATEGORY_LENGTH = 50;
 const MAX_CATEGORIES = 15;
