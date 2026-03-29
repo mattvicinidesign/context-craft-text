@@ -109,7 +109,7 @@ const Index = () => {
       <section className="max-w-7xl mx-auto px-6 pt-8 pb-4">
         <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight mb-2">
           Generate Realistic Placeholder Text
-          <span className="text-primary"> (Better Than Lorem Ipsum)</span>
+          <span className="text-primary"> (Context-Aware Placeholder Text)</span>
         </h1>
         <p className="text-sm text-muted-foreground font-body max-w-2xl leading-relaxed">
           Stop using meaningless filler text. This AI lorem ipsum generator creates context-aware
