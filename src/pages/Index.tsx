@@ -25,6 +25,7 @@ const Index = () => {
   const [outputs, setOutputs] = useState<Record<string, string>>({});
   const [loadingCategories, setLoadingCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [includeEmojis, setIncludeEmojis] = useState(false);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
