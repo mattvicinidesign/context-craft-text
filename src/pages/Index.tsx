@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
