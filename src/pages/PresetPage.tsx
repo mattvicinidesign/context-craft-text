@@ -1,5 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Sparkles, Zap, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,14 +13,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const PresetPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const preset = PRESETS.find((p) => p.slug === slug);
+  const preset = useMemo(() => PRESETS.find((p) => p.slug === slug), [slug]);
 
-  if (!preset) return <Navigate to="/" replace />;
-
-  const [prompt, setPrompt] = useState(preset.prompt);
+  const [prompt, setPrompt] = useState(preset?.prompt ?? "");
   const [tone, setTone] = useState<Tone>("Neutral");
-  const [categories, setCategories] = useState<string[]>(preset.categories);
-  const [outputs, setOutputs] = useState<Record<string, string>>(preset.examples);
+  const [categories, setCategories] = useState<string[]>(preset?.categories ?? []);
+  const [outputs, setOutputs] = useState<Record<string, string>>(preset?.examples ?? {});
   const [loadingCategories, setLoadingCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -58,6 +56,8 @@ const PresetPage = () => {
     [prompt, tone]
   );
 
+  if (!preset) return <Navigate to="/" replace />;
+
   const hasOutputs = Object.keys(outputs).length > 0;
 
   return (
@@ -82,7 +82,6 @@ const PresetPage = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6">
-        {/* Intro text for SEO */}
         <div className="mb-6 max-w-2xl">
           <p className="text-sm text-muted-foreground font-body leading-relaxed">
             {preset.description} Powered by AI, this lorem ipsum generator creates realistic placeholder text
