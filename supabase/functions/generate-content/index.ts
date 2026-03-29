@@ -128,6 +128,10 @@ serve(async (req) => {
 - Keep outputs professional and usable in real UI`
       : "\n\nDo NOT include any emojis in the output.";
 
+    const languageInstruction = cleanLanguage !== "en"
+      ? `\n\nLANGUAGE: Generate ALL content natively in ${languageName}. Do NOT translate from English — write naturally in ${languageName} with culturally appropriate phrasing. Adapt tone and style to ${languageName} conventions.`
+      : "";
+
     const systemPrompt = `You are a professional UX copywriter. Generate realistic, context-aware placeholder content for UI design and prototyping. NEVER use lorem ipsum or gibberish. Content must be concise, UI-appropriate, and reflect the given context.
 
 IMPORTANT: You must ONLY output valid JSON. Do not include any commentary, explanations, or markdown. The JSON must have these exact keys: ${categoryList}
@@ -142,7 +146,7 @@ Keep content lengths appropriate:
 - Error Message: 8-20 words
 - Other categories: 10-40 words
 
-NEVER produce harmful, offensive, violent, sexual, or discriminatory content. Keep all content professional and safe for work.${emojiInstruction}`;
+NEVER produce harmful, offensive, violent, sexual, or discriminatory content. Keep all content professional and safe for work.${emojiInstruction}${languageInstruction}`;
 
     const userPrompt = `Context: ${cleanPrompt}
 Tone: ${cleanTone}
