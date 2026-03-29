@@ -64,7 +64,7 @@ const Index = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("generate-content", {
-          body: { prompt: trimmed, tone, categories: categoriesToGenerate },
+          body: { prompt: trimmed, tone, categories: categoriesToGenerate, includeEmojis },
         });
 
         if (error) throw error;
