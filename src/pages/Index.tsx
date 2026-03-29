@@ -135,7 +135,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 min-h-[calc(100vh-280px)]">
           {/* Left Panel */}
           <div className="space-y-5">
-            <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} />
+            <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} language={language} />
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
             <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
