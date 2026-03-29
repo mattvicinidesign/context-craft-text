@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
-import { Sparkles, Zap } from "lucide-react";
+import { Sparkles, Zap, Smile } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
@@ -23,6 +25,7 @@ const Index = () => {
   const [outputs, setOutputs] = useState<Record<string, string>>({});
   const [loadingCategories, setLoadingCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
+  const [includeEmojis, setIncludeEmojis] = useState(false);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
@@ -61,7 +64,7 @@ const Index = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("generate-content", {
-          body: { prompt: trimmed, tone, categories: categoriesToGenerate },
+          body: { prompt: trimmed, tone, categories: categoriesToGenerate, includeEmojis },
         });
 
         if (error) throw error;
@@ -77,7 +80,7 @@ const Index = () => {
         setLoadingCategories(new Set());
       }
     },
-    [prompt, tone]
+    [prompt, tone, includeEmojis]
   );
 
   const handleGenerate = () => generateContent(categories);
@@ -126,6 +129,22 @@ const Index = () => {
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} />
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
+
+            {/* Emoji Toggle */}
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <Smile className="w-4 h-4 text-muted-foreground" />
+                <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
+                  Include Emojis
+                </Label>
+              </div>
+              <Switch
+                id="emoji-toggle"
+                checked={includeEmojis}
+                onCheckedChange={setIncludeEmojis}
+                disabled={isGenerating}
+              />
+            </div>
 
             <Button
               onClick={handleGenerate}
