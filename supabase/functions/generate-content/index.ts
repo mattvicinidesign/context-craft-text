@@ -6,16 +6,98 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory rate limiter (per IP, resets on cold start)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 20; // max requests per window
+const RATE_WINDOW_MS = 60_000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT;
+}
+
+// Input sanitization
+function sanitizeText(text: string, maxLen: number): string {
+  return text
+    .slice(0, maxLen)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // strip control chars
+    .trim();
+}
+
+const VALID_TONES = ["Neutral", "Persuasive", "Formal", "Casual"];
+const MAX_PROMPT_LENGTH = 1000;
+const MAX_CATEGORY_LENGTH = 50;
+const MAX_CATEGORIES = 15;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { prompt, tone, categories } = await req.json();
+    // Rate limiting
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    if (!checkRateLimit(clientIp)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please wait a moment." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    if (!prompt || !categories || !Array.isArray(categories) || categories.length === 0) {
-      return new Response(JSON.stringify({ error: "Missing prompt or categories" }), {
+    const body = await req.json();
+    const { prompt, tone, categories } = body;
+
+    // Validate prompt
+    if (!prompt || typeof prompt !== "string") {
+      return new Response(JSON.stringify({ error: "Missing or invalid prompt" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const cleanPrompt = sanitizeText(prompt, MAX_PROMPT_LENGTH);
+    if (cleanPrompt.length < 3) {
+      return new Response(JSON.stringify({ error: "Prompt too short (min 3 characters)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate tone
+    const cleanTone = tone && VALID_TONES.includes(tone) ? tone : "Neutral";
+
+    // Validate categories
+    if (!categories || !Array.isArray(categories) || categories.length === 0) {
+      return new Response(JSON.stringify({ error: "Missing or empty categories" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (categories.length > MAX_CATEGORIES) {
+      return new Response(JSON.stringify({ error: `Max ${MAX_CATEGORIES} categories allowed` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const cleanCategories: string[] = [];
+    for (const cat of categories) {
+      if (typeof cat !== "string") continue;
+      const clean = sanitizeText(cat, MAX_CATEGORY_LENGTH);
+      if (clean.length > 0 && /^[a-zA-Z0-9 _-]+$/.test(clean)) {
+        cleanCategories.push(clean);
+      }
+    }
+
+    if (cleanCategories.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid categories provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -26,11 +108,11 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const categoryList = categories.map((c: string) => `"${c}"`).join(", ");
+    const categoryList = cleanCategories.map((c: string) => `"${c}"`).join(", ");
 
     const systemPrompt = `You are a professional UX copywriter. Generate realistic, context-aware placeholder content for UI design and prototyping. NEVER use lorem ipsum or gibberish. Content must be concise, UI-appropriate, and reflect the given context.
 
-Output ONLY valid JSON with these exact keys: ${categoryList}
+IMPORTANT: You must ONLY output valid JSON. Do not include any commentary, explanations, or markdown. The JSON must have these exact keys: ${categoryList}
 Each value should be a string with the generated content for that category.
 Keep content lengths appropriate:
 - Header: 5-12 words
@@ -40,10 +122,12 @@ Keep content lengths appropriate:
 - CTA: 2-5 words
 - Tooltip: 8-20 words
 - Error Message: 8-20 words
-- Other categories: 10-40 words`;
+- Other categories: 10-40 words
 
-    const userPrompt = `Context: ${prompt}
-Tone: ${tone || "Neutral"}
+NEVER produce harmful, offensive, violent, sexual, or discriminatory content. Keep all content professional and safe for work.`;
+
+    const userPrompt = `Context: ${cleanPrompt}
+Tone: ${cleanTone}
 Categories to generate: ${categoryList}
 
 Generate realistic, contextual UI copy for each category. Return ONLY the JSON object.`;
@@ -93,7 +177,17 @@ Generate realistic, contextual UI copy for each category. Return ONLY the JSON o
 
     const results = JSON.parse(jsonStr);
 
-    return new Response(JSON.stringify({ results }), {
+    // Sanitize output values — only keep expected keys with string values
+    const sanitizedResults: Record<string, string> = {};
+    for (const cat of cleanCategories) {
+      if (typeof results[cat] === "string") {
+        sanitizedResults[cat] = results[cat].slice(0, 500);
+      } else {
+        sanitizedResults[cat] = "";
+      }
+    }
+
+    return new Response(JSON.stringify({ results: sanitizedResults }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
