@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
-import { Sparkles, Zap } from "lucide-react";
+import { Sparkles, Zap, Smile } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
