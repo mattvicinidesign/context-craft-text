@@ -110,6 +110,16 @@ serve(async (req) => {
 
     const categoryList = cleanCategories.map((c: string) => `"${c}"`).join(", ");
 
+    const emojiInstruction = includeEmojis
+      ? `\n\nEMOJI RULES: Include contextually relevant emojis in the output. Rules:
+- Max 1-2 emojis per section
+- Place emojis at the start or end of sentences only (never mid-word)
+- Match tone: Neutral=minimal/subtle, Persuasive=more expressive, Formal=avoid or very limited, Casual=more frequent
+- Emojis must enhance meaning, not be random
+- No spammy emoji chains
+- Keep outputs professional and usable in real UI`
+      : "\n\nDo NOT include any emojis in the output.";
+
     const systemPrompt = `You are a professional UX copywriter. Generate realistic, context-aware placeholder content for UI design and prototyping. NEVER use lorem ipsum or gibberish. Content must be concise, UI-appropriate, and reflect the given context.
 
 IMPORTANT: You must ONLY output valid JSON. Do not include any commentary, explanations, or markdown. The JSON must have these exact keys: ${categoryList}
@@ -124,7 +134,7 @@ Keep content lengths appropriate:
 - Error Message: 8-20 words
 - Other categories: 10-40 words
 
-NEVER produce harmful, offensive, violent, sexual, or discriminatory content. Keep all content professional and safe for work.`;
+NEVER produce harmful, offensive, violent, sexual, or discriminatory content. Keep all content professional and safe for work.${emojiInstruction}`;
 
     const userPrompt = `Context: ${cleanPrompt}
 Tone: ${cleanTone}
