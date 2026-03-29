@@ -131,6 +131,7 @@ const Index = () => {
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} />
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
+            <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
 
             {/* Emoji Toggle */}
             <div className="flex items-center justify-between py-2">
