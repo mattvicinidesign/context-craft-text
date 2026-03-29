@@ -55,7 +55,11 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { prompt, tone, categories, includeEmojis } = body;
+    const { prompt, tone, categories, includeEmojis, language } = body;
+
+    // Validate language
+    const cleanLanguage = language && VALID_LANGUAGES[language] ? language : "en";
+    const languageName = VALID_LANGUAGES[cleanLanguage];
 
     // Validate prompt
     if (!prompt || typeof prompt !== "string") {
