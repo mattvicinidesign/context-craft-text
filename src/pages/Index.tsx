@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
@@ -26,6 +27,7 @@ const Index = () => {
   const [loadingCategories, setLoadingCategories] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
   const [includeEmojis, setIncludeEmojis] = useState(false);
+  const [language, setLanguage] = useState<LanguageCode>("en");
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
@@ -64,7 +66,7 @@ const Index = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("generate-content", {
-          body: { prompt: trimmed, tone, categories: categoriesToGenerate, includeEmojis },
+          body: { prompt: trimmed, tone, categories: categoriesToGenerate, includeEmojis, language },
         });
 
         if (error) throw error;
@@ -80,7 +82,7 @@ const Index = () => {
         setLoadingCategories(new Set());
       }
     },
-    [prompt, tone, includeEmojis]
+    [prompt, tone, includeEmojis, language]
   );
 
   const handleGenerate = () => generateContent(categories);
@@ -129,6 +131,7 @@ const Index = () => {
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} />
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
+            <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
 
             {/* Emoji Toggle */}
             <div className="flex items-center justify-between py-2">
