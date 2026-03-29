@@ -76,7 +76,14 @@ const Index = () => {
         }
       } catch (err: any) {
         console.error("Generation error:", err);
-        toast.error(err.message || "Failed to generate content");
+        const msg = err?.message || "";
+        if (msg.includes("Rate limit") || msg.includes("429")) {
+          toast.error("Too many requests. Please wait a moment.");
+        } else if (msg.includes("402")) {
+          toast.error("AI credits exhausted. Please try again later.");
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
       } finally {
         setIsGenerating(false);
         setLoadingCategories(new Set());
