@@ -51,7 +51,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { prompt, tone, categories } = body;
+    const { prompt, tone, categories, includeEmojis } = body;
 
     // Validate prompt
     if (!prompt || typeof prompt !== "string") {
