@@ -80,7 +80,7 @@ const Index = () => {
         setLoadingCategories(new Set());
       }
     },
-    [prompt, tone]
+    [prompt, tone, includeEmojis]
   );
 
   const handleGenerate = () => generateContent(categories);
