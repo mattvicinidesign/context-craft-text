@@ -130,6 +130,22 @@ const Index = () => {
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
 
+            {/* Emoji Toggle */}
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <Smile className="w-4 h-4 text-muted-foreground" />
+                <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
+                  Include Emojis
+                </Label>
+              </div>
+              <Switch
+                id="emoji-toggle"
+                checked={includeEmojis}
+                onCheckedChange={setIncludeEmojis}
+                disabled={isGenerating}
+              />
+            </div>
+
             <Button
               onClick={handleGenerate}
               disabled={isGenerating || !prompt.trim() || categories.length === 0}
