@@ -104,6 +104,10 @@ const Index = () => {
   };
   const handleRefreshAll = () => generateContent(categories);
   const handleRegenerateCategory = (category: string) => generateContent([category]);
+  const handleHistorySelect = (promptText: string) => {
+    setPrompt(promptText);
+    generateContent(categories);
+  };
 
   const hasOutputs = Object.keys(outputs).length > 0;
 
