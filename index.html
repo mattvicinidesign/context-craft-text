@@ -1,12 +1,24 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6HRL33XBZC"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-6HRL33XBZC');
+      (function() {
+        var isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        var noTrack = window.location.search.indexOf('noTrack=true') !== -1;
+        try { if (localStorage.getItem('disable_tracking') === 'true') noTrack = true; } catch(e) {}
+        window.__GA_DISABLED__ = isDev || noTrack;
+        if (!window.__GA_DISABLED__) {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-6HRL33XBZC';
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-6HRL33XBZC');
+        }
+      })();
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
