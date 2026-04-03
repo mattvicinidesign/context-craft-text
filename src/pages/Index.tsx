@@ -14,6 +14,7 @@ import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import ExampleShowcase from "@/components/ExampleShowcase";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_CATEGORIES = ["Header", "Subcopy", "Paragraph", "Body"];
