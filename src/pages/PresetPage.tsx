@@ -10,6 +10,7 @@ import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import { PRESETS } from "@/lib/presets";
 import { supabase } from "@/integrations/supabase/client";
+import { trackCtaClick } from "@/lib/analytics";
 
 const PresetPage = () => {
   const { slug } = useParams<{ slug: string }>();
