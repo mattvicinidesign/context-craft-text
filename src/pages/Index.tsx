@@ -93,7 +93,10 @@ const Index = () => {
     [prompt, tone, includeEmojis, language]
   );
 
-  const handleGenerate = () => generateContent(categories);
+  const handleGenerate = () => {
+    trackCtaClick("Generate", "Home");
+    generateContent(categories);
+  };
   const handleRefreshAll = () => generateContent(categories);
   const handleRegenerateCategory = (category: string) => generateContent([category]);
 
