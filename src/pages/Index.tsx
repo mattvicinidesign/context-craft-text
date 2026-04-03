@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
+import { trackCtaClick } from "@/lib/analytics";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
