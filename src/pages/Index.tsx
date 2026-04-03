@@ -1,12 +1,14 @@
 import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
 import { trackCtaClick } from "@/lib/analytics";
+import { savePromptToHistory } from "@/lib/promptHistory";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
+import PromptHistory from "@/components/PromptHistory";
 import ToneSelector, { type Tone } from "@/components/ToneSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
