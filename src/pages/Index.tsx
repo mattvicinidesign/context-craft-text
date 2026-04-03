@@ -106,7 +106,29 @@ const Index = () => {
   const handleRegenerateCategory = (category: string) => generateContent([category]);
   const handleHistorySelect = (promptText: string) => {
     setPrompt(promptText);
-    generateContent(categories);
+    // Generate with the selected prompt directly since setState is async
+    const trimmed = promptText.trim();
+    if (!trimmed || trimmed.length < 3 || categories.length === 0) return;
+    const now = Date.now();
+    if (now - lastGenerateTime < MIN_INTERVAL_MS) {
+      toast.error("Please wait a moment before generating again");
+      return;
+    }
+    lastGenerateTime = now;
+    setIsGenerating(true);
+    setLoadingCategories(new Set(categories));
+    supabase.functions.invoke("generate-content", {
+      body: { prompt: trimmed, tone, categories, includeEmojis, language },
+    }).then(({ data, error }) => {
+      if (error) throw error;
+      if (data?.results) setOutputs((prev) => ({ ...prev, ...data.results }));
+    }).catch((err: any) => {
+      console.error("Generation error:", err);
+      toast.error("Something went wrong. Please try again.");
+    }).finally(() => {
+      setIsGenerating(false);
+      setLoadingCategories(new Set());
+    });
   };
 
   const hasOutputs = Object.keys(outputs).length > 0;
