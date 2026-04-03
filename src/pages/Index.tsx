@@ -163,7 +163,7 @@ const Index = () => {
             <Button
               onClick={handleGenerate}
               disabled={isGenerating || !prompt.trim() || categories.length === 0}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
+              className="cta-button w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
               size="lg"
             >
               {isGenerating ? (
