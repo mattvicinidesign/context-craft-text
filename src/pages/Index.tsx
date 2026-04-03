@@ -136,7 +136,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <SEOHead
+        title="AI Lorem Ipsum Generator — Contextual Placeholder Text"
+        description="Generate realistic, context-aware placeholder text for UI design. AI-powered lorem ipsum alternative with structured output for headers, CTAs, body copy, and more."
+        path="/"
+      />
       <header className="border-b border-border px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
