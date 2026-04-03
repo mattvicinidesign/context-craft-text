@@ -8,6 +8,7 @@ import ToneSelector, { type Tone } from "@/components/ToneSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
+import SEOHead from "@/components/SEOHead";
 import { PRESETS } from "@/lib/presets";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCtaClick } from "@/lib/analytics";
