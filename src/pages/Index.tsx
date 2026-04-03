@@ -1,12 +1,14 @@
 import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
 import { trackCtaClick } from "@/lib/analytics";
+import { savePromptToHistory } from "@/lib/promptHistory";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
+import PromptHistory from "@/components/PromptHistory";
 import ToneSelector, { type Tone } from "@/components/ToneSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
@@ -29,6 +31,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [includeEmojis, setIncludeEmojis] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
@@ -64,6 +67,8 @@ const Index = () => {
 
       setIsGenerating(true);
       setLoadingCategories(new Set(categoriesToGenerate));
+      savePromptToHistory(trimmed);
+      setHistoryRefreshKey((k) => k + 1);
 
       try {
         const { data, error } = await supabase.functions.invoke("generate-content", {
@@ -99,6 +104,32 @@ const Index = () => {
   };
   const handleRefreshAll = () => generateContent(categories);
   const handleRegenerateCategory = (category: string) => generateContent([category]);
+  const handleHistorySelect = (promptText: string) => {
+    setPrompt(promptText);
+    // Generate with the selected prompt directly since setState is async
+    const trimmed = promptText.trim();
+    if (!trimmed || trimmed.length < 3 || categories.length === 0) return;
+    const now = Date.now();
+    if (now - lastGenerateTime < MIN_INTERVAL_MS) {
+      toast.error("Please wait a moment before generating again");
+      return;
+    }
+    lastGenerateTime = now;
+    setIsGenerating(true);
+    setLoadingCategories(new Set(categories));
+    supabase.functions.invoke("generate-content", {
+      body: { prompt: trimmed, tone, categories, includeEmojis, language },
+    }).then(({ data, error }) => {
+      if (error) throw error;
+      if (data?.results) setOutputs((prev) => ({ ...prev, ...data.results }));
+    }).catch((err: any) => {
+      console.error("Generation error:", err);
+      toast.error("Something went wrong. Please try again.");
+    }).finally(() => {
+      setIsGenerating(false);
+      setLoadingCategories(new Set());
+    });
+  };
 
   const hasOutputs = Object.keys(outputs).length > 0;
 
@@ -140,6 +171,7 @@ const Index = () => {
           {/* Left Panel */}
           <div className="space-y-5">
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} language={language} />
+            <PromptHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
             <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
