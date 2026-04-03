@@ -244,6 +244,34 @@ const Index = () => {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Contextual Ipsum",
+            url: "https://context-craft-text.lovable.app",
+            logo: "https://context-craft-text.lovable.app/favicon-32x32.png",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Contextual Ipsum",
+            url: "https://context-craft-text.lovable.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://context-craft-text.lovable.app/?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
             "@type": "WebApplication",
             name: "Contextual Ipsum — AI Lorem Ipsum Generator",
             url: "https://context-craft-text.lovable.app",
