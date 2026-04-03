@@ -67,6 +67,8 @@ const Index = () => {
 
       setIsGenerating(true);
       setLoadingCategories(new Set(categoriesToGenerate));
+      savePromptToHistory(trimmed);
+      setHistoryRefreshKey((k) => k + 1);
 
       try {
         const { data, error } = await supabase.functions.invoke("generate-content", {
