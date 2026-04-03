@@ -31,6 +31,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [includeEmojis, setIncludeEmojis] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
