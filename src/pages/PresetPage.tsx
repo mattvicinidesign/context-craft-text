@@ -8,6 +8,7 @@ import ToneSelector, { type Tone } from "@/components/ToneSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
+import SEOHead from "@/components/SEOHead";
 import { PRESETS } from "@/lib/presets";
 import { supabase } from "@/integrations/supabase/client";
 import { trackCtaClick } from "@/lib/analytics";
@@ -63,6 +64,11 @@ const PresetPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={preset.metaTitle}
+        description={preset.metaDescription}
+        path={`/${preset.slug}`}
+      />
       <header className="border-b border-border px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <Link to="/" className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">

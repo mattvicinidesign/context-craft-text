@@ -14,6 +14,7 @@ import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import ExampleShowcase from "@/components/ExampleShowcase";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 
 const DEFAULT_CATEGORIES = ["Header", "Subcopy", "Paragraph", "Body"];
@@ -135,7 +136,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <SEOHead
+        title="AI Lorem Ipsum Generator — Contextual Placeholder Text"
+        description="Generate realistic, context-aware placeholder text for UI design. AI-powered lorem ipsum alternative with structured output for headers, CTAs, body copy, and more."
+        path="/"
+      />
       <header className="border-b border-border px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -234,6 +239,34 @@ const Index = () => {
       <FAQSection />
 
       {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Contextual Ipsum",
+            url: "https://context-craft-text.lovable.app",
+            logo: "https://context-craft-text.lovable.app/favicon-32x32.png",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Contextual Ipsum",
+            url: "https://context-craft-text.lovable.app",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://context-craft-text.lovable.app/?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          }),
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
