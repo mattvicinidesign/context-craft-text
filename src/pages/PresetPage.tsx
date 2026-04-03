@@ -10,6 +10,7 @@ import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import { PRESETS } from "@/lib/presets";
 import { supabase } from "@/integrations/supabase/client";
+import { trackCtaClick } from "@/lib/analytics";
 
 const PresetPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -95,9 +96,12 @@ const PresetPage = () => {
             <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
             <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
             <Button
-              onClick={() => generateContent(categories)}
+              onClick={() => {
+                trackCtaClick("Generate", `Preset: ${preset.title}`);
+                generateContent(categories);
+              }}
               disabled={isGenerating || !prompt.trim() || categories.length === 0}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
+              className="cta-button w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
               size="lg"
             >
               {isGenerating ? (

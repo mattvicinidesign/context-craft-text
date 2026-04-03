@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Sparkles, Zap, Smile } from "lucide-react";
+import { trackCtaClick } from "@/lib/analytics";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import LanguageSelector, { type LanguageCode } from "@/components/LanguageSelector";
@@ -92,7 +93,10 @@ const Index = () => {
     [prompt, tone, includeEmojis, language]
   );
 
-  const handleGenerate = () => generateContent(categories);
+  const handleGenerate = () => {
+    trackCtaClick("Generate", "Home");
+    generateContent(categories);
+  };
   const handleRefreshAll = () => generateContent(categories);
   const handleRegenerateCategory = (category: string) => generateContent([category]);
 
@@ -159,7 +163,7 @@ const Index = () => {
             <Button
               onClick={handleGenerate}
               disabled={isGenerating || !prompt.trim() || categories.length === 0}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
+              className="cta-button w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
               size="lg"
             >
               {isGenerating ? (
