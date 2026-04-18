@@ -10,12 +10,14 @@ import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
 import PromptHistory from "@/components/PromptHistory";
 import ToneSelector, { type Tone } from "@/components/ToneSelector";
+import TextTransformSelector, { type TextTransform } from "@/components/TextTransformSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import ExampleShowcase from "@/components/ExampleShowcase";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
+import { toAPTitleCase } from "@/lib/apTitleCase";
 
 const DEFAULT_CATEGORIES = ["Header", "Subcopy", "Paragraph", "Body"];
 
@@ -33,6 +35,23 @@ const Index = () => {
   const [includeEmojis, setIncludeEmojis] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [textTransform, setTextTransform] = useState<TextTransform>("None");
+
+  const isTransformMode = textTransform !== "None";
+  const transformCategories = ["AP Title Case"];
+
+  const runTextTransform = useCallback(() => {
+    const trimmed = prompt.trim();
+    if (!trimmed) {
+      toast.error("Please enter text first");
+      return;
+    }
+    savePromptToHistory(trimmed);
+    setHistoryRefreshKey((k) => k + 1);
+    if (textTransform === "AP Title Case") {
+      setOutputs({ "AP Title Case": toAPTitleCase(trimmed) });
+    }
+  }, [prompt, textTransform]);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
@@ -100,13 +119,38 @@ const Index = () => {
   );
 
   const handleGenerate = () => {
+    if (isTransformMode) {
+      trackCtaClick("Transform", "Home");
+      runTextTransform();
+      return;
+    }
     trackCtaClick("Generate", "Home");
     generateContent(categories);
   };
-  const handleRefreshAll = () => generateContent(categories);
-  const handleRegenerateCategory = (category: string) => generateContent([category]);
+  const handleRefreshAll = () => {
+    if (isTransformMode) {
+      runTextTransform();
+      return;
+    }
+    generateContent(categories);
+  };
+  const handleRegenerateCategory = (category: string) => {
+    if (isTransformMode) {
+      runTextTransform();
+      return;
+    }
+    generateContent([category]);
+  };
   const handleHistorySelect = (promptText: string) => {
     setPrompt(promptText);
+    if (isTransformMode) {
+      const trimmed = promptText.trim();
+      if (!trimmed) return;
+      savePromptToHistory(trimmed);
+      setHistoryRefreshKey((k) => k + 1);
+      setOutputs({ "AP Title Case": toAPTitleCase(trimmed) });
+      return;
+    }
     // Generate with the selected prompt directly since setState is async
     const trimmed = promptText.trim();
     if (!trimmed || trimmed.length < 3 || categories.length === 0) return;
