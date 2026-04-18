@@ -225,7 +225,7 @@ const Index = () => {
           {/* Left Panel */}
           <div className="space-y-5">
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} language={language} />
-            <TextTransformSelector value={textTransform} onChange={setTextTransform} disabled={isGenerating} />
+            <TextTransformSelector value={textTransform} onChange={handleTextTransformChange} disabled={isGenerating} />
             <PromptHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />
             {!isTransformMode && (
               <>
