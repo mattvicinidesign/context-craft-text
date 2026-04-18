@@ -231,24 +231,30 @@ const Index = () => {
             )}
 
             {/* Emoji Toggle */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <Smile className="w-4 h-4 text-muted-foreground" />
-                <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
-                  Include Emojis
-                </Label>
+            {!isTransformMode && (
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Smile className="w-4 h-4 text-muted-foreground" />
+                  <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
+                    Include Emojis
+                  </Label>
+                </div>
+                <Switch
+                  id="emoji-toggle"
+                  checked={includeEmojis}
+                  onCheckedChange={setIncludeEmojis}
+                  disabled={isGenerating}
+                />
               </div>
-              <Switch
-                id="emoji-toggle"
-                checked={includeEmojis}
-                onCheckedChange={setIncludeEmojis}
-                disabled={isGenerating}
-              />
-            </div>
+            )}
 
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !prompt.trim() || categories.length === 0}
+              disabled={
+                isGenerating ||
+                !prompt.trim() ||
+                (!isTransformMode && categories.length === 0)
+              }
               className="cta-button w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
               size="lg"
             >
@@ -260,7 +266,7 @@ const Index = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate
+                  {isTransformMode ? "Transform" : "Generate"}
                 </>
               )}
             </Button>
@@ -269,7 +275,7 @@ const Index = () => {
           {/* Right Panel */}
           <div className="bg-card border border-border rounded-xl p-5">
             <OutputPanel
-              categories={categories}
+              categories={isTransformMode ? transformCategories : categories}
               outputs={outputs}
               loadingCategories={loadingCategories}
               onRegenerateCategory={handleRegenerateCategory}
