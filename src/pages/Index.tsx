@@ -40,6 +40,11 @@ const Index = () => {
   const isTransformMode = textTransform !== "None";
   const transformCategories = ["AP Title Case"];
 
+  const handleTextTransformChange = (next: TextTransform) => {
+    setTextTransform(next);
+    setOutputs({});
+  };
+
   const runTextTransform = useCallback(() => {
     const trimmed = prompt.trim();
     if (!trimmed) {
