@@ -10,12 +10,14 @@ import { toast } from "sonner";
 import PromptInput from "@/components/PromptInput";
 import PromptHistory from "@/components/PromptHistory";
 import ToneSelector, { type Tone } from "@/components/ToneSelector";
+import TextTransformSelector, { type TextTransform } from "@/components/TextTransformSelector";
 import CategoryBuilder from "@/components/CategoryBuilder";
 import OutputPanel from "@/components/OutputPanel";
 import FAQSection from "@/components/FAQSection";
 import ExampleShowcase from "@/components/ExampleShowcase";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
+import { toAPTitleCase } from "@/lib/apTitleCase";
 
 const DEFAULT_CATEGORIES = ["Header", "Subcopy", "Paragraph", "Body"];
 
@@ -33,6 +35,28 @@ const Index = () => {
   const [includeEmojis, setIncludeEmojis] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [textTransform, setTextTransform] = useState<TextTransform>("None");
+
+  const isTransformMode = textTransform !== "None";
+  const transformCategories = ["AP Title Case"];
+
+  const handleTextTransformChange = (next: TextTransform) => {
+    setTextTransform(next);
+    setOutputs({});
+  };
+
+  const runTextTransform = useCallback(() => {
+    const trimmed = prompt.trim();
+    if (!trimmed) {
+      toast.error("Please enter text first");
+      return;
+    }
+    savePromptToHistory(trimmed);
+    setHistoryRefreshKey((k) => k + 1);
+    if (textTransform === "AP Title Case") {
+      setOutputs({ "AP Title Case": toAPTitleCase(trimmed) });
+    }
+  }, [prompt, textTransform]);
 
   const generateContent = useCallback(
     async (categoriesToGenerate: string[]) => {
@@ -100,13 +124,38 @@ const Index = () => {
   );
 
   const handleGenerate = () => {
+    if (isTransformMode) {
+      trackCtaClick("Transform", "Home");
+      runTextTransform();
+      return;
+    }
     trackCtaClick("Generate", "Home");
     generateContent(categories);
   };
-  const handleRefreshAll = () => generateContent(categories);
-  const handleRegenerateCategory = (category: string) => generateContent([category]);
+  const handleRefreshAll = () => {
+    if (isTransformMode) {
+      runTextTransform();
+      return;
+    }
+    generateContent(categories);
+  };
+  const handleRegenerateCategory = (category: string) => {
+    if (isTransformMode) {
+      runTextTransform();
+      return;
+    }
+    generateContent([category]);
+  };
   const handleHistorySelect = (promptText: string) => {
     setPrompt(promptText);
+    if (isTransformMode) {
+      const trimmed = promptText.trim();
+      if (!trimmed) return;
+      savePromptToHistory(trimmed);
+      setHistoryRefreshKey((k) => k + 1);
+      setOutputs({ "AP Title Case": toAPTitleCase(trimmed) });
+      return;
+    }
     // Generate with the selected prompt directly since setState is async
     const trimmed = promptText.trim();
     if (!trimmed || trimmed.length < 3 || categories.length === 0) return;
@@ -176,30 +225,41 @@ const Index = () => {
           {/* Left Panel */}
           <div className="space-y-5">
             <PromptInput value={prompt} onChange={setPrompt} disabled={isGenerating} language={language} />
+            <TextTransformSelector value={textTransform} onChange={handleTextTransformChange} disabled={isGenerating} />
             <PromptHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />
-            <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
-            <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
-            <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
+            {!isTransformMode && (
+              <>
+                <ToneSelector value={tone} onChange={setTone} disabled={isGenerating} />
+                <CategoryBuilder categories={categories} onChange={setCategories} disabled={isGenerating} />
+                <LanguageSelector value={language} onChange={setLanguage} disabled={isGenerating} />
+              </>
+            )}
 
             {/* Emoji Toggle */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <Smile className="w-4 h-4 text-muted-foreground" />
-                <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
-                  Include Emojis
-                </Label>
+            {!isTransformMode && (
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <Smile className="w-4 h-4 text-muted-foreground" />
+                  <Label htmlFor="emoji-toggle" className="text-sm font-display font-medium text-foreground cursor-pointer">
+                    Include Emojis
+                  </Label>
+                </div>
+                <Switch
+                  id="emoji-toggle"
+                  checked={includeEmojis}
+                  onCheckedChange={setIncludeEmojis}
+                  disabled={isGenerating}
+                />
               </div>
-              <Switch
-                id="emoji-toggle"
-                checked={includeEmojis}
-                onCheckedChange={setIncludeEmojis}
-                disabled={isGenerating}
-              />
-            </div>
+            )}
 
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !prompt.trim() || categories.length === 0}
+              disabled={
+                isGenerating ||
+                !prompt.trim() ||
+                (!isTransformMode && categories.length === 0)
+              }
               className="cta-button w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold tracking-wide"
               size="lg"
             >
@@ -211,7 +271,7 @@ const Index = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate
+                  {isTransformMode ? "Transform" : "Generate"}
                 </>
               )}
             </Button>
@@ -220,7 +280,7 @@ const Index = () => {
           {/* Right Panel */}
           <div className="bg-card border border-border rounded-xl p-5">
             <OutputPanel
-              categories={categories}
+              categories={isTransformMode ? transformCategories : categories}
               outputs={outputs}
               loadingCategories={loadingCategories}
               onRegenerateCategory={handleRegenerateCategory}
